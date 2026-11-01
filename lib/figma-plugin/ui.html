@@ -1,0 +1,38 @@
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 20px; font: 12px/1.5 Inter, system-ui, sans-serif; background: var(--figma-color-bg); color: var(--figma-color-text); }
+  h1 { margin: 0 0 4px; font-size: 14px; font-weight: 600; }
+  p { margin: 0 0 16px; color: var(--figma-color-text-secondary); }
+  label { display: block; margin-bottom: 6px; font-weight: 500; }
+  input { width: 100%; height: 36px; padding: 0 10px; border: 1px solid var(--figma-color-border); border-radius: 6px; background: var(--figma-color-bg); color: var(--figma-color-text);
+    font: 500 14px ui-monospace, Menlo, monospace; letter-spacing: 0.06em; text-transform: uppercase; }
+  input:focus { outline: 2px solid var(--figma-color-border-brand-strong); outline-offset: -1px; }
+  button { width: 100%; height: 36px; margin-top: 12px; border: 0; border-radius: 6px; background: var(--figma-color-bg-brand); color: var(--figma-color-text-onbrand); font: 600 13px Inter, system-ui, sans-serif; cursor: pointer; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  #status { min-height: 18px; margin-top: 12px; }
+  #status.error { color: var(--figma-color-text-danger); }
+</style>
+<h1>Import your design system</h1>
+<p>Enter the code from <b>figma/README.md</b> in your download.</p>
+<form id="form">
+  <label for="code">Code</label>
+  <input id="code" placeholder="TSR-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" autofocus>
+  <button id="go" type="submit">Import</button>
+  <div id="status" role="status"></div>
+</form>
+<script>
+  const form = document.getElementById("form"), input = document.getElementById("code"), go = document.getElementById("go"), status = document.getElementById("status");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!input.value.trim()) { status.className = "error"; status.textContent = "Enter your code first."; return; }
+    go.disabled = true; status.className = ""; status.textContent = "Checking your code…";
+    parent.postMessage({ pluginMessage: { type: "import", code: input.value } }, "*");
+  });
+  onmessage = (e) => {
+    const msg = e.data.pluginMessage;
+    if (!msg) return;
+    status.className = msg.type === "error" ? "error" : "";
+    status.textContent = msg.message;
+    if (msg.type === "error") go.disabled = false;
+  };
+</script>
